@@ -2,9 +2,14 @@ import wx
 from src.ui.MainWin_Ui import MainWin_Ui
 from src.ataque_dialog import AtaqueDialog
 from src.utils.iface_detect import get_interfaces, IfaceClass
-from src.utils.wash import Wash
+from src.utils.wash import Wash, WashClass
 from src.utils.redes import Red
 from pubsub import pub
+from datetime import datetime
+from threading import Timer
+import sys
+import os
+import signal
 
 class MainWin(MainWin_Ui):
     
@@ -14,9 +19,26 @@ class MainWin(MainWin_Ui):
         MainWin_Ui.__init__(self, parent, *args, **kwargs)
         self.iface = None
         self.iface_name = None
+        self.status_timer = None
+        self.wash = None
         pub.subscribe(self.set_status, "status")
         pub.subscribe(self.add_red_to_list, "red_nueva")
+        pub.subscribe(self._logger, "log")
+        pub.subscribe(self.log_debug, "log_debug")
+        pub.subscribe(self.log_info, "log_info")
+        pub.subscribe(self.log_error, "log_error")
+        pub.subscribe(self.log_warning, "log_warning")
         self.update_ifaces()
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
+    def OnClose(self, event):
+        # kill threads
+        if self.wash is not None:
+            self.wash.matar()
+        # stop monitor and restore services
+        self.log_debug(self.iface.airmon_stop())
+        self.log_debug(self.iface.desactivar_iface())
+        self.Destroy()
 
     # ─── METODOS ────────────────────────────────────────────────────────────────────
 
@@ -39,14 +61,25 @@ class MainWin(MainWin_Ui):
         self.txt_iface_modo.SetValue(self.iface.modo.title())
         self.txt_iface_power.SetValue(self.iface.power + ' dBm')
     
-    def set_status(self, texto):
-        self.SetStatusText(texto, 0)
+    def set_status(self, texto, timeout=False):
+        # self.SetStatusText(texto, 0)
+        self.PushStatusText(texto)
+        if timeout:
+            if self.status_timer is not None:
+                if self.status_timer.isAlive():
+                    self.status_timer.cancel()
+            self.status_timer = Timer(10, self.clear_status)
+            self.status_timer.start()
+    
+    def clear_status(self):
+        self.set_status(" ")
     
     def add_red_to_list(self, data):
         r = Red()
         r.load_from_json(data)
         self.lista_redes_escaneadas.append(data)
         self.lista_redes.Append(r.parser_to_table)
+        self.log_debug(r.diccionario)
     
     def countdown(self, timer):
         newtime = int(timer) - 1
@@ -73,6 +106,41 @@ class MainWin(MainWin_Ui):
         red = Red()
         red.load_from_lista(lista)
         return red
+    
+    def _get_text_style(self, tipo):
+        estilos = {
+            'INFO': [wx.BLUE, wx.FONTWEIGHT_NORMAL],
+            'ERROR': [wx.RED, wx.FONTWEIGHT_NORMAL],
+            'DEBUG': [wx.Colour(35, 110, 31), wx.FONTWEIGHT_NORMAL],
+            'WARNING': [wx.Colour(181, 67, 14), wx.FONTWEIGHT_NORMAL],
+            'DEFAULT': [wx.BLACK, wx.FONTWEIGHT_NORMAL]
+        }
+        if tipo.upper() not in estilos.keys():
+            tipo = "DEFAULT"
+        estilo = wx.TextAttr(estilos[tipo][0])
+        estilo.SetFontWeight(estilos[tipo][1])
+        return estilo
+
+    def _logger(self, texto, tipo="DEFAULT"):
+        estilo = self._get_text_style(tipo.upper())
+        self.txt_output.SetDefaultStyle(estilo)
+        # prepare and add text
+        txt = f" [{datetime.now().strftime('%H:%M:%S')}] {tipo}: {texto} \n\n"
+        self.txt_output.AppendText(txt)
+    
+    def log_info(self, texto):
+        self._logger(texto, 'INFO')
+    
+    def log_error(self, texto):
+        self._logger(texto, 'ERROR')
+        self.set_status(texto, True)
+    
+    def log_debug(self, texto):
+        self._logger(texto, 'DEBUG')
+
+    def log_warning(self, texto):
+        self._logger(texto, 'WARNING')
+        self.set_status(texto, True)
 
     # ─── EVENTOS ────────────────────────────────────────────────────────────────────
 
@@ -87,32 +155,40 @@ class MainWin(MainWin_Ui):
     # activa o desactiva el modo monitor
     def on_btn_airmon_toggle(self, event):
         if self.combo_iface.Selection > 0:
-            print(self.iface.airmon_toggle())
+            self.log_debug(self.iface.airmon_toggle())
             self.update_ifaces()
         else:
-            print("Selecciona una tarjeta antes de usar esta opcion")
+            self.log_warning("Debes seleccionar una tarjeta antes de usar esta opcion")
 
     # mata los procesos que puedan interferir con el modo monitor
     def on_btn_airmon_check(self, event):
         if self.iface.modo == 'monitor':
-            print(self.iface.airmon_check_kill())
-            print(self.iface.stop_avahi_daemon())
-            if len(self.iface.airmon_check()) == 0:
-                print("El modo monitor esta funcionando correctamente")
+            self.log_debug(self.iface.optimize())
+            # self.log_debug(self.iface.disable_avahi_daemon())
+            # self.log_debug(self.iface.stop_avahi_daemon())
+            # self.log_debug(self.iface.airmon_check_kill())
+            # self.log_debug(self.iface.enable_avahi_daemon())
+            if self.iface.is_optimized:
+                self.log_info("El modo monitor esta funcionando correctamente")
         else:
-            print("Activa el modo monitor antes de usar esta opcion")
+            self.log_warning("Debes activar el modo monitor antes de usar esta opcion")
     
     # aplica la interfaz seleccionada por defecto
     def on_btn_select_iface(self, event):
         if self.iface.modo == 'monitor':
-            if len(self.iface.airmon_check()) == 0:
-                print(self.iface.ifconfig_up())
+            # si la interfaz esta bien configurada...
+            if self.iface.is_optimized:
                 self.iface_name = self.iface.name
                 self.SetStatusText(self.iface_name, 1)
+                self.SetStatusWidths([-1, 100])
+                self.set_status(self.iface.ifconfig_up(), True)
             else:
-                print("La interfaz no esta optimizada")
+                txt = "La interfaz no esta optimizada, usa el boton 'Optimizar interfaz'."
+                self.set_status(txt, True)
+                txt += "\nEl boton 'optimizar' desactivará servicios de red usados por el sistema. "
+                self.log_error(txt)
         else:
-            print("Activa el modo monitor antes de usar esta opcion")
+            self.log_warning("Activa el modo monitor antes de usar esta opcion")
 
     # inicia escaneo con wash
     def on_btn_scan(self, event):
@@ -121,11 +197,14 @@ class MainWin(MainWin_Ui):
         self.lista_redes_escaneadas = []
         self.add_red_to_list(self.test_red)
         if self.iface_name is not None:
-            w = Wash(self.iface_name, self.txt_timeout.GetValue())
-            w.start()
-            self.countdown(self.txt_timeout.GetValue())
+            timeout = self.spin_timeout.GetValue()
+            channel = self.combo_canal.GetSelection()
+            self.wash = Wash(self.iface_name, timeout, channel)
+            self.wash.start()
+            self.countdown(timeout)
         else:
-            print("No hay ninguna interfaz configurada")
+            self.log_warning("No hay ninguna interfaz configurada")
+            self.set_status("Selecciona una interfaz y activala", True)
 
     # TODO: abrir ventana modal dedicada a esa red
     def on_lista_select_red(self, event):
@@ -135,4 +214,8 @@ class MainWin(MainWin_Ui):
 
     # TODO: pendiente de crear proceso
     def on_btn_powerup(self, event):
-        print("Event handler 'on_btn_powerup' not implemented!")
+        self.log_debug("OPCION POWERUP NO IMPLEMENTADA...")
+    
+    # FIXME: treure Popen de wash i afegir tots al acabar l'escaneada
+    def on_button_clear_output(self, event):
+        self.txt_output.Clear()

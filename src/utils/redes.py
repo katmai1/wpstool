@@ -51,23 +51,28 @@ class Red:
     @property
     def progress(self):
         if "progress" in list(self.d.keys()):
-            return float(self.d['progress'])
+            try:
+                return float(self.d['progress'])
+            except Exception as e:
+                return float(0.0)
         return None
 
-    # @property
-    # def parser_to_table(self):
-    #     return [
-    #         self.d['essid'], self.d['bssid'], self.d['channel'],
-    #         self.d['dbm'], self.d['lock'], self.d['vendor'],
-    #         self.d['wps'], self.d['progress']
-    #     ]
     @property
     def parser_to_table(self):
         return [
             self.essid, self.bssid, self.channel, self.dbm,
-            self.lock, self.vendor, self.wps, self.progress
+            self.lock, self.vendor, self.wps, f"{self.progress}%"
         ]
-       
+    
+    @property
+    def diccionario(self):
+        header_list = ['essid', 'bssid', 'channel', 'dbm', 'lock', 'vendor', 'wps', 'progress']
+        valores_list = self.parser_to_table
+        junto = zip(header_list, valores_list)
+        return dict(junto)
+
+    # ─── LOADER ─────────────────────────────────────────────────────────────────────
+
     def load_from_lista(self, lista):
         header = ['essid', 'bssid', 'channel', 'dbm', 'lock', 'vendor', 'wps', 'progress']
         junto = zip(header, lista)
@@ -76,12 +81,4 @@ class Red:
     def load_from_json(self, data):
         self.d = dict(data)
     
-    # def print_self(self):
-    #     print(self.__dir__())
-    
-    # def run_reaver(self, opciones, iface="wlan0mon"):
-    #     cmd = "konsole --hold --hide-menubar -e 'reaver -b %s -e %s -c %s %s -i %s'" % (
-    #         self.bssid, self.essid, str(self.channel), opciones, iface
-    #     )
-    #     print(cmd)
-    #     proc = Popen(cmd, shell=True)
+    # ────────────────────────────────────────────────────────────────────────────────
