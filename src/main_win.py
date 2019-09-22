@@ -2,19 +2,20 @@ import wx
 from src.ui.MainWin_Ui import MainWin_Ui
 from src.ataque_dialog import AtaqueDialog
 from src.utils.iface_detect import get_interfaces, IfaceClass
-from src.utils.wash import Wash, WashClass
+from src.utils.wash import Wash
 from src.utils.redes import Red
 from pubsub import pub
 from datetime import datetime
 from threading import Timer
-import sys
-import os
-import signal
+
 
 class MainWin(MainWin_Ui):
-    
-    test_red = {'bssid': 'AA:BB:CC:DD:EE:FF', 'channel': '12', 'dbm': '-79', 'wps': '2.0', 'lock': 'No', 'vendor': 'RalinkTe', 'progress': '0.01', 'essid': 'Vomistar_1234'}
-    
+
+    test_red = {
+        'bssid': 'AA:BB:CC:DD:EE:FF', 'channel': '12', 'dbm': '-79', 'wps': '2.0',
+        'lock': 'No', 'vendor': 'RalinkTe', 'progress': '0.01', 'essid': 'Vomistar_1234'
+    }
+
     def __init__(self, parent, *args, **kwargs):
         MainWin_Ui.__init__(self, parent, *args, **kwargs)
         self.iface = None
@@ -49,18 +50,18 @@ class MainWin(MainWin_Ui):
         for l in lista:
             items.append(l.name)
         self.combo_iface.SetItems(items)
-        self.combo_iface.Select(len(items)-1)
+        self.combo_iface.Select(len(items) - 1)
         self.on_combo_iface_changed(None)
 
     # limpia los fields de info
     def clear_info_fields(self):
         self.txt_iface_modo.Clear()
         self.txt_iface_power.Clear()
-    
+
     def set_info_fields(self):
         self.txt_iface_modo.SetValue(self.iface.modo.title())
         self.txt_iface_power.SetValue(self.iface.power + ' dBm')
-    
+
     def set_status(self, texto, timeout=False):
         # self.SetStatusText(texto, 0)
         self.PushStatusText(texto)
@@ -70,17 +71,17 @@ class MainWin(MainWin_Ui):
                     self.status_timer.cancel()
             self.status_timer = Timer(10, self.clear_status)
             self.status_timer.start()
-    
+
     def clear_status(self):
         self.set_status(" ")
-    
+
     def add_red_to_list(self, data):
         r = Red()
         r.load_from_json(data)
         self.lista_redes_escaneadas.append(data)
         self.lista_redes.Append(r.parser_to_table)
         self.log_debug(r.diccionario)
-    
+
     def countdown(self, timer):
         newtime = int(timer) - 1
         texto = "%ds - Buscando redes..." % newtime
@@ -93,7 +94,7 @@ class MainWin(MainWin_Ui):
 
     def ordenar_lista_redes(self, keyname="dbm"):
         self.set_status(" ")
-        newlist = sorted(self.lista_redes_escaneadas, key=lambda k: k['dbm']) 
+        newlist = sorted(self.lista_redes_escaneadas, key=lambda k: k['dbm'])
         self.lista_redes.DeleteAllItems()
         for item in newlist:
             self.add_red_to_list(item)
@@ -106,7 +107,7 @@ class MainWin(MainWin_Ui):
         red = Red()
         red.load_from_lista(lista)
         return red
-    
+
     def _get_text_style(self, tipo):
         estilos = {
             'INFO': [wx.BLUE, wx.FONTWEIGHT_NORMAL],
@@ -127,14 +128,14 @@ class MainWin(MainWin_Ui):
         # prepare and add text
         txt = f" [{datetime.now().strftime('%H:%M:%S')}] {tipo}: {texto} \n\n"
         self.txt_output.AppendText(txt)
-    
+
     def log_info(self, texto):
         self._logger(texto, 'INFO')
-    
+
     def log_error(self, texto):
         self._logger(texto, 'ERROR')
         self.set_status(texto, True)
-    
+
     def log_debug(self, texto):
         self._logger(texto, 'DEBUG')
 
@@ -172,7 +173,7 @@ class MainWin(MainWin_Ui):
                 self.log_info("El modo monitor esta funcionando correctamente")
         else:
             self.log_warning("Debes activar el modo monitor antes de usar esta opcion")
-    
+
     # aplica la interfaz seleccionada por defecto
     def on_btn_select_iface(self, event):
         if self.iface.modo == 'monitor':
@@ -215,7 +216,7 @@ class MainWin(MainWin_Ui):
     # TODO: pendiente de crear proceso
     def on_btn_powerup(self, event):
         self.log_debug("OPCION POWERUP NO IMPLEMENTADA...")
-    
+
     # FIXME: treure Popen de wash i afegir tots al acabar l'escaneada
     def on_button_clear_output(self, event):
         self.txt_output.Clear()

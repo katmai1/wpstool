@@ -1,5 +1,5 @@
 import peewee
-import datetime
+
 
 db = peewee.SqliteDatabase('database.db')
 

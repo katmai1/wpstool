@@ -13,7 +13,7 @@ class AtaqueDialog(AtaqueDialog_Ui):
         self.set_resumen()
         self.db = self.get_db()
         self.txt_notas.SetValue(self.db.notas)
-    
+
     def set_resumen(self):
         def add(texto):
             self.txt_resumen.AppendText(texto + "\n")
@@ -23,9 +23,9 @@ class AtaqueDialog(AtaqueDialog_Ui):
         add(f"Power: \t {self.red.dbm}")
         add(f"Locked: \t {self.red.lock}")
         add("----------------------------")
-    
+
     def get_db(self):
-        db, created= RedDB.get_or_create(bssid=self.red.bssid)
+        db, created = RedDB.get_or_create(bssid=self.red.bssid)
         if created:
             db.essid = self.red.essid
             db.save()
@@ -53,30 +53,30 @@ class AtaqueDialog(AtaqueDialog_Ui):
         # prepare and add text
         txt = f" [{datetime.now().strftime('%H:%M:%S')}] {tipo}: {texto} \n\n"
         self.txt_output.AppendText(txt)
-    
+
     def log_info(self, texto):
         self._logger(texto, 'INFO')
-    
+
     def log_error(self, texto):
         self._logger(texto, 'ERROR')
         self.set_status(texto, True)
-    
+
     def log_debug(self, texto):
         self._logger(texto, 'DEBUG')
 
     def log_warning(self, texto):
         self._logger(texto, 'WARNING')
         self.set_status(texto, True)
-    
+
     # ─── EVENTOS ────────────────────────────────────────────────────────────────────
 
     def on_btn_save_notas(self, event):
         self.db.notas = self.txt_notas.GetValue()
         self.db.save()
-    
+
     def on_button_clear_output(self, event):
         self.txt_output.Clear()
-    
+
     def on_button_run_reaver(self, event):
         cmd = self.get_command()
         self.log_debug(cmd)
@@ -104,7 +104,7 @@ class AtaqueDialog(AtaqueDialog_Ui):
             'verbose': [False, self.combo_verbose.GetSelection(), None]
         }
         return opciones
-        
+
     def get_command(self):
         cmd = self._base_command
         opciones = self._get_opciones
