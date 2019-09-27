@@ -1,5 +1,6 @@
 from src.ui.AtaqueDialog_Ui import AtaqueDialog_Ui
-from src.db import RedDB
+from src.db import RedDB, ReaverConfig
+from src.utils.redes import Red
 import wx
 from datetime import datetime
 
@@ -9,12 +10,16 @@ class AtaqueDialog(AtaqueDialog_Ui):
     def __init__(self, parent, red, *args, **kwargs):
         AtaqueDialog_Ui.__init__(self, parent, *args, **kwargs)
         self.parent = parent
-        self.red = red
-        self.set_resumen()
+        self.red = Red()
+        self.red.load_from_json(red)
         self.db = self.get_db()
-        self.txt_notas.SetValue(self.db.notas)
+        self.load_reaver_configs()
+        #
+        self.SetTitle(f"{red['essid']} | {red['bssid']}")
+        self.load_info()
+        
 
-    def set_resumen(self):
+    def load_info(self):
         def add(texto):
             self.txt_resumen.AppendText(texto + "\n")
         add(f"ESSID: \t {self.red.essid}")
@@ -23,6 +28,16 @@ class AtaqueDialog(AtaqueDialog_Ui):
         add(f"Power: \t {self.red.dbm}")
         add(f"Locked: \t {self.red.lock}")
         add("----------------------------")
+        self.txt_notas.SetValue(self.db.notas)
+
+    def load_reaver_configs(self):
+        lista = []
+        for item in ReaverConfig.select():
+            lista.append(item.name)
+        self.cmb_reaver_configs.SetItems(lista)
+        if len(lista) > 0:
+            self.cmb_reaver_configs.Select(0)
+            self.on_cmb_reaver_config_change_selection(None)
 
     def get_db(self):
         db, created = RedDB.get_or_create(bssid=self.red.bssid)
@@ -30,43 +45,6 @@ class AtaqueDialog(AtaqueDialog_Ui):
             db.essid = self.red.essid
             db.save()
         return db
-
-    # ─── LOGS ───────────────────────────────────────────────────────────────────────
-
-    def _get_text_style(self, tipo):
-        estilos = {
-            'INFO': [wx.BLUE, wx.FONTWEIGHT_NORMAL],
-            'ERROR': [wx.RED, wx.FONTWEIGHT_NORMAL],
-            'DEBUG': [wx.Colour(35, 110, 31), wx.FONTWEIGHT_NORMAL],
-            'WARNING': [wx.Colour(181, 67, 14), wx.FONTWEIGHT_NORMAL],
-            'DEFAULT': [wx.BLACK, wx.FONTWEIGHT_NORMAL]
-        }
-        if tipo.upper() not in estilos.keys():
-            tipo = "DEFAULT"
-        estilo = wx.TextAttr(estilos[tipo][0])
-        estilo.SetFontWeight(estilos[tipo][1])
-        return estilo
-
-    def _logger(self, texto, tipo="DEFAULT"):
-        estilo = self._get_text_style(tipo.upper())
-        self.txt_output.SetDefaultStyle(estilo)
-        # prepare and add text
-        txt = f" [{datetime.now().strftime('%H:%M:%S')}] {tipo}: {texto} \n\n"
-        self.txt_output.AppendText(txt)
-
-    def log_info(self, texto):
-        self._logger(texto, 'INFO')
-
-    def log_error(self, texto):
-        self._logger(texto, 'ERROR')
-        self.set_status(texto, True)
-
-    def log_debug(self, texto):
-        self._logger(texto, 'DEBUG')
-
-    def log_warning(self, texto):
-        self._logger(texto, 'WARNING')
-        self.set_status(texto, True)
 
     # ─── EVENTOS ────────────────────────────────────────────────────────────────────
 
@@ -77,11 +55,69 @@ class AtaqueDialog(AtaqueDialog_Ui):
     def on_button_clear_output(self, event):
         self.txt_output.Clear()
 
-    def on_button_run_reaver(self, event):
+    def on_btn_run_reaver(self, event):
         cmd = self.get_command()
-        self.log_debug(cmd)
+        wx.LogDebug(cmd)
+
+    def on_btn_new_reaver_config(self, event):
+        nombre = wx.GetTextFromUser("Introduce un nombre: ", "Crear nueva configuración", parent=self)
+        if nombre != "":
+            nuevo, created = ReaverConfig.get_or_create(name=nombre)
+            if created:
+                nuevo.save()
+                self.load_reaver_configs()
+            else:
+                wx.LogWarning("Ya existe un perfil con este nombre")
+    
+    def on_cmb_reaver_config_change_selection(self, event):
+        text = self.cmb_reaver_configs.GetStringSelection()
+        config = ReaverConfig.get(ReaverConfig.name == text)
+        self._load_config_checks(config)
+        self._load_config_values(config)
+    
+    def on_btn_save_reaver_config(self, event):
+        text = self.cmb_reaver_configs.GetStringSelection()
+        config = ReaverConfig.get(ReaverConfig.name == text)
+        config.update_info(self._get_opciones)
+        config.save()
+    
+    def on_btn_saveas_reaver_config(self, event):
+        nombre = wx.GetTextFromUser("Introduce un nombre: ", "Guardar como...", parent=self)
+        if nombre != "":
+            nuevo, created = ReaverConfig.get_or_create(name=nombre)
+            if created:
+                nuevo.update_info(self._get_opciones)
+                nuevo.save()
+                self.load_reaver_configs()
+            else:
+                wx.LogWarning("Ya existe un perfil con este nombre")
+    
+    def on_btn_delete_reaver_config(self, event):
+        text = self.cmb_reaver_configs.GetStringSelection()
+        config = ReaverConfig.get(ReaverConfig.name == text)
+        config.delete_instance()
+        self.load_reaver_configs()
+
 
     # ─── PRIVATE METHODS ────────────────────────────────────────────────────────────
+    def _load_config_checks(self, config):
+        self.check_delay.SetValue(config.delay)
+        self.check_pin.SetValue(config.pin)
+        self.check_recurring.SetValue(config.recurring)
+        self.check_timeout.SetValue(config.timeout)
+        self.check_timeout_m57.SetValue(config.timeout_m57)
+        self.check_ignore_fcs.SetValue(config.ignore_fcs)
+        self.check_noassociate.SetValue(config.noassociate)
+        self.check_nonack.SetValue(config.nonack)
+        self.check_pixie.SetValue(config.pixie)
+    
+    def _load_config_values(self, data):
+        self.txt_delay.SetValue(data.delay_value)
+        self.txt_pin.SetValue(data.pin_value)
+        self.txt_recurring.SetValue(data.recurring_value)
+        self.txt_timeout.SetValue(data.timeout_value)
+        self.txt_timeout_m57.SetValue(data.timeout_m57_value)
+        self.combo_verbose.Select(data.verbose)
 
     @property
     def _base_command(self):

@@ -186,8 +186,7 @@ class IfaceClass(object):
         return log
     
     def desactivar_iface(self):
-        log = self.ifconfig_up()
-        log += self.start_avahi_daemon()
+        log = self.start_avahi_daemon()
         log += self.start_network_manager()
         return log
 

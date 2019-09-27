@@ -3,10 +3,52 @@
 	{
 		"selected_items":
 		[
+			[
+				"was",
+				"wash_proc\tstatement"
+			],
+			[
+				"EVT",
+				"EVT_BUILD_UPDATE"
+			],
+			[
+				"Was",
+				"WashProcess\tclass"
+			],
+			[
+				"log_",
+				"log_debug\tfunction"
+			],
+			[
+				"is",
+				"isAlive\tfunction"
+			],
+			[
+				"log",
+				"log_error\tfunction"
+			]
 		]
 	},
 	"buffers":
 	[
+		{
+			"file": "src/main_win.py",
+			"settings":
+			{
+				"buffer_size": 7231,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/utils/wash.py",
+			"settings":
+			{
+				"buffer_size": 2962,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -20,6 +62,18 @@
 		"selected_items":
 		[
 			[
+				"test",
+				"Anaconda: Run Project Tests"
+			],
+			[
+				"Package Control: ",
+				"Package Control: Install Package"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
 				"ins",
 				"Package Control: Install Package"
 			],
@@ -30,19 +84,20 @@
 			[
 				"insta",
 				"Package Control: Install Package"
-			],
-			[
-				"Package Control: ",
-				"Package Control: Install Package"
 			]
 		],
 		"width": 0.0
 	},
 	"console":
 	{
-		"height": 0.0,
+		"height": 150.0,
 		"history":
 		[
+			"sublime.log_input(True)",
+			"sublime.log_commands(True)",
+			"help",
+			"conemu",
+			"keymap"
 		]
 	},
 	"distraction_free":
@@ -56,24 +111,32 @@
 	},
 	"expanded_folders":
 	[
-		"/home/q/dev/wpstool/src"
+		"/home/q/dev/wpstool",
+		"/home/q/dev/wpstool/src",
+		"/home/q/dev/wpstool/src/utils"
 	],
 	"file_history":
 	[
+		"/home/q/dev/wpstool/src/ataque_dialog.py",
+		"/home/q/dev/wpstool/src/main_win.py",
+		"/home/q/dev/wpstool/src/utils/wash.py",
+		"/home/q/dev/wpstool/tests/test_main.py",
+		"/home/q/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
+		"/home/q/.config/sublime-text-3/Packages/User/Default (Linux).sublime-keymap",
+		"/home/q/.config/sublime-text-3/Packages/Anaconda/Default (Linux).sublime-keymap",
+		"/home/q/dev/wpstool/wpstool.sublime-project",
+		"/home/q/.config/sublime-text-3/Packages/Terminality/Default (Linux).sublime-keymap",
+		"/home/q/dev/wpstool/run.py",
 		"/home/q/.config/sublime-text-3/Packages/TodoReview/TodoReview.sublime-settings",
 		"/home/q/.config/sublime-text-3/Packages/ToDone/readme.todo",
-		"/home/q/dev/wpstool/src/main_win.py",
 		"/home/q/.config/sublime-text-3/Packages/Highlighter/highlighter.sublime-settings",
 		"/home/q/dev/wpstool/src/db.py",
-		"/home/q/dev/wpstool/src/ataque_dialog.py",
-		"/home/q/dev/wpstool/wpstool.sublime-project",
-		"/home/q/.config/sublime-text-3/Packages/Anaconda/Anaconda.sublime-settings",
 		"/home/q/dev/arduino/theremin/theremin/theremin.ino",
 		"/home/q/.config/sublime-text-3/Packages/User/Anaconda.sublime-settings"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 39.0
 	},
 	"find_in_files":
 	{
@@ -87,6 +150,13 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"wash_proc",
+			"Output",
+			"self.log_debug",
+			"self.log_warning",
+			"self.log_info",
+			"self.log_debug",
+			"test"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -104,18 +174,89 @@
 	"groups":
 	[
 		{
+			"selected": 0,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "src/main_win.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7231,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6561,
+								6561
+							]
+						],
+						"settings":
+						{
+							"SL.86.region_keys":
+							[
+								"SL.annotations.Highlights.|083408994f1c3520d601e5cc6ac3f9872961bc265898611dd3607288467803ec|region.yellowish markup.warning.sublime_linter|32",
+								"SL.annotations.Highlights.|90773a685ec9393895437afda9465fb887ddc968ce755ec3726c11510dc304b8|region.yellowish markup.warning.sublime_linter|32",
+								"sublime_linter.protected_regions",
+								"SL.annotations.Gutter.|region.yellowish markup.warning.sublime_linter|dot"
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2784.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/utils/wash.py",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2962,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10,
+								10
+							]
+						],
+						"settings":
+						{
+							"SL.87.region_keys":
+							[
+							],
+							"syntax": "Packages/Python/Python.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
 			]
 		}
 	],
 	"incremental_find":
 	{
-		"height": 0.0
+		"height": 26.0
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 38.0
 	},
 	"layout":
 	{
@@ -144,6 +285,10 @@
 	{
 		"height": 0.0
 	},
+	"output.exec":
+	{
+		"height": 268.0
+	},
 	"output.find_results":
 	{
 		"height": 0.0
@@ -152,7 +297,7 @@
 	"project": "wpstool.sublime-project",
 	"replace":
 	{
-		"height": 0.0
+		"height": 48.0
 	},
 	"save_all_on_build": true,
 	"select_file":
@@ -175,12 +320,12 @@
 	},
 	"select_symbol":
 	{
-		"height": 0.0,
+		"height": 392.0,
 		"last_filter": "",
 		"selected_items":
 		[
 		],
-		"width": 0.0
+		"width": 592.0
 	},
 	"selected_group": 0,
 	"settings":
@@ -190,7 +335,7 @@
 	"show_open_files": false,
 	"show_tabs": true,
 	"side_bar_visible": true,
-	"side_bar_width": 150.0,
+	"side_bar_width": 259.0,
 	"status_bar_visible": true,
 	"template_settings":
 	{
