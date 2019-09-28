@@ -99,7 +99,6 @@ class WashProcess(wx.Process):
         if self.is_alive:
             wx.LogError("Wash ya se esta ejecutando...")
         else:
-            print(self.comando)
             self.pid = wx.Execute(self.comando, wx.EXEC_ASYNC, self)
             self._countdown(self.timeout/1000)
         

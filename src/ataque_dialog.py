@@ -1,8 +1,10 @@
 from src.ui.AtaqueDialog_Ui import AtaqueDialog_Ui
 from src.db import RedDB, ReaverConfig
 from src.utils.redes import Red
+from src.utils.reaver import ReaverProcess
 import wx
 from datetime import datetime
+from pubsub import pub
 
 
 class AtaqueDialog(AtaqueDialog_Ui):
@@ -12,11 +14,13 @@ class AtaqueDialog(AtaqueDialog_Ui):
         self.parent = parent
         self.red = Red()
         self.red.load_from_json(red)
+        self.reaver = ReaverProcess(self)
         self.db = self.get_db()
         self.load_reaver_configs()
         #
         self.SetTitle(f"{red['essid']} | {red['bssid']}")
         self.load_info()
+        pub.subscribe(self.add_nota, "nota")
         
 
     def load_info(self):
@@ -45,6 +49,10 @@ class AtaqueDialog(AtaqueDialog_Ui):
             db.essid = self.red.essid
             db.save()
         return db
+    
+    def add_nota(self, texto):
+        self.txt_notas.AppendText("\n" + texto)
+        self.on_btn_save_notas(None)
 
     # ─── EVENTOS ────────────────────────────────────────────────────────────────────
 
@@ -56,8 +64,18 @@ class AtaqueDialog(AtaqueDialog_Ui):
         self.txt_output.Clear()
 
     def on_btn_run_reaver(self, event):
-        cmd = self.get_command()
-        wx.LogDebug(cmd)
+        if self.parent.iface_name is None:
+            wx.LogWarning("Debes seleccionar una interfaz de red")
+        else:
+            cmd = self.get_command()
+            self.reaver.set_comando(cmd)
+            self.reaver.start()
+            self.read_logfile()
+
+    def read_logfile(self):
+        self.txt_output.SetValue(self.reaver.get_log())
+        if self.reaver.is_alive:
+            wx.CallLater(1000, self.read_logfile)
 
     def on_btn_new_reaver_config(self, event):
         nombre = wx.GetTextFromUser("Introduce un nombre: ", "Crear nueva configuración", parent=self)
@@ -97,6 +115,24 @@ class AtaqueDialog(AtaqueDialog_Ui):
         config = ReaverConfig.get(ReaverConfig.name == text)
         config.delete_instance()
         self.load_reaver_configs()
+
+    # def reaver_idle(self, event):
+    #     if self.reaver is not None:
+    #         stream = self.reaver.GetInputStream()
+    #         if stream.CanRead():
+    #             text = stream.read()
+    #             wx.LogDebug(text)
+    
+    # def reaver_on_terminate(self, event):
+    #     wx.LogDebug("on terminate")
+    #     stream = self.reaver.GetInputStream()
+    #     if stream.CanRead():
+    #         text = stream.read()
+    #         wx.LogDebug(text)
+    
+    # def on_btn_reaver_stop(self, event):
+    #     if self.reaver is not None:
+    #         self.reaver.Kill(self.reaver_pid)
 
 
     # ─── PRIVATE METHODS ────────────────────────────────────────────────────────────
